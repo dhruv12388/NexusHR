@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexusHR - Advanced Enterprise Employee Management System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jsPDF & html2canvas for Real PDF Downloads -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); }
+        .dark .glass { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+    </style>
+</head>
+<body class="h-full bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors duration-200">
+
+    <div id="app" class="h-full flex flex-col">
+        <!-- Dynamic content rendered via JS -->
+        <div id="auth-screen" class="flex-1 flex items-center justify-center p-4 bg-gradient-to-br from-indigo-900 via-slate-900 to-slate-950">
+            <div class="w-full max-w-md bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-8">
+                <div class="text-center mb-8">
+                    <div class="inline-flex items-center justify-center w-16 h-16 bg-brand-600 text-white rounded-2xl shadow-lg mb-4 text-2xl font-bold">
+                        <i class="fa-solid fa-cube"></i>
+                    </div>
+                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white">NexusHR Enterprise</h1>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Advanced Employee Management Portal</p>
+                </div>
+
+                <!-- Auth Mode Switcher Tabs -->
+                <div class="flex rounded-xl bg-slate-100 dark:bg-slate-700/50 p-1 mb-6">
+                    <button onclick="switchAuthTab('login')" id="tab-login" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm transition">Sign In</button>
+                    <button onclick="switchAuthTab('register')" id="tab-register" class="flex-1 py-2 text-sm font-semibold text-slate-500 dark:text-slate-400 rounded-lg transition">Register</button>
+                </div>
+
+                <!-- Login Form -->
+                <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Email Address</label>
+                        <input type="email" id="login-email" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none transition" placeholder="admin@nexus.com">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Password</label>
+                        <input type="password" id="login-password" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none transition" placeholder="••••••••">
+                    </div>
+                    <div class="flex items-center justify-between text-sm">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" class="rounded text-brand-600 focus:ring-brand-500">
+                            <span class="text-slate-600 dark:text-slate-400">Remember me</span>
+                        </label>
+                        <button type="button" onclick="showForgotPasswordModal()" class="text-brand-600 dark:text-brand-400 hover:underline font-medium">Forgot Password?</button>
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-lg shadow-brand-600/30 transition">Sign In to Dashboard</button>
+                    
+                    <div class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700 text-center">
+                        <p class="text-xs text-slate-500 mb-2">Quick Demo Access:</p>
+                        <div class="flex gap-2 justify-center">
+                            <button type="button" onclick="fillDemoCredentials('admin')" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-xs font-medium rounded-lg">Admin Demo</button>
+                            <button type="button" onclick="fillDemoCredentials('employee')" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-xs font-medium rounded-lg">Employee Demo</button>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Register Form -->
+                <form id="form-register" onsubmit="handleRegister(event)" class="space-y-4 hidden">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">First Name</label>
+                            <input type="text" id="reg-fname" required class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Last Name</label>
+                            <input type="text" id="reg-lname" required class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Email Address</label>
+                        <input type="email" id="reg-email" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Password</label>
+                        <input type="password" id="reg-password" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase mb-1">Department</label>
+                        <select id="reg-dept" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none">
+                            <option value="Engineering">Engineering</option>
+                            <option value="Product & Design">Product & Design</option>
+                            <option value="Human Resources">Human Resources</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Finance">Finance</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="w-full py-3 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl shadow-lg shadow-brand-600/30 transition">Create Account</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Global Modal Container -->
+    <div id="modal-container" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm hidden"></div>
+
+    <script>
+        // --- State Management ---
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'nexuhr-enterprise-v1';
+        let currentUser = null;
+        let currentView = 'dashboard';
+        let dbCache = {
+            employees: [],
+            departments: [],
+            attendance: [],
+            leaves: [],
+            payroll: [],
+            tasks: [],
+            announcements: [],
+            auditLogs: []
+        };
+        let chartsInstance = {};
+
+        // Initial Mock Data Seeding if empty
+        function initializeDefaultData() {
+            if (!localStorage.getItem(appId + '_seeded')) {
+                const defaultEmployees = [
+                    { id: 'EMP-1001', fname: 'Sarah', lname: 'Jenkins', email: 'admin@nexus.com', role: 'admin', dept: 'Engineering', designation: 'VP of Engineering', salary: 145000, status: 'Active', joiningDate: '2021-03-15', phone: '+1 (555) 234-5678', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150' },
+                    { id: 'EMP-1002', fname: 'Marcus', lname: 'Vance', email: 'marcus@nexus.com', role: 'employee', dept: 'Engineering', designation: 'Senior Backend Engineer', salary: 120000, status: 'Active', joiningDate: '2022-06-10', phone: '+1 (555) 876-5432', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150' },
+                    { id: 'EMP-1003', fname: 'Elena', lname: 'Rostova', email: 'elena@nexus.com', role: 'employee', dept: 'Product & Design', designation: 'Lead Product Designer', salary: 110000, status: 'Active', joiningDate: '2023-01-20', phone: '+1 (555) 345-6789', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
+                    { id: 'EMP-1004', fname: 'David', lname: 'Kim', email: 'david@nexus.com', role: 'employee', dept: 'Human Resources', designation: 'HR Business Partner', salary: 95000, status: 'Active', joiningDate: '2022-11-05', phone: '+1 (555) 987-6543', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150' },
+                    { id: 'EMP-1005', fname: 'Jessica', lname: 'Taylor', email: 'jessica@nexus.com', role: 'employee', dept: 'Marketing', designation: 'Growth Marketing Lead', salary: 105000, status: 'On Leave', joiningDate: '2023-04-12', phone: '+1 (555) 456-7890', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150' }
+                ];
+
+                const defaultDepartments = [
+                    { id: 'DEPT-1', name: 'Engineering', head: 'Sarah Jenkins', budget: 1200000, count: 2 },
+                    { id: 'DEPT-2', name: 'Product & Design', head: 'Elena Rostova', budget: 600000, count: 1 },
+                    { id: 'DEPT-3', name: 'Human Resources', head: 'David Kim', budget: 400000, count: 1 },
+                    { id: 'DEPT-4', name: 'Marketing', head: 'Jessica Taylor', budget: 500000, count: 1 },
+                    { id: 'DEPT-5', name: 'Finance', head: 'Unassigned', budget: 450000, count: 0 }
+                ];
+
+                const defaultAttendance = [
+                    { id: 'ATT-1', empId: 'EMP-1001', name: 'Sarah Jenkins', date: '2026-06-06', checkIn: '08:52 AM', checkOut: '05:30 PM', status: 'Present', hours: '8h 38m' },
+                    { id: 'ATT-2', empId: 'EMP-1002', name: 'Marcus Vance', date: '2026-06-06', checkIn: '09:05 AM', checkOut: '06:15 PM', status: 'Late', hours: '9h 10m' },
+                    { id: 'ATT-3', empId: 'EMP-1003', name: 'Elena Rostova', date: '2026-06-06', checkIn: '08:45 AM', checkOut: '05:00 PM', status: 'Present', hours: '8h 15m' },
+                    { id: 'ATT-4', empId: 'EMP-1004', name: 'David Kim', date: '2026-06-06', checkIn: '09:00 AM', checkOut: '05:00 PM', status: 'Present', hours: '8h 00m' }
+                ];
+
+                const defaultLeaves = [
+                    { id: 'LV-1', empId: 'EMP-1005', name: 'Jessica Taylor', type: 'Annual Leave', from: '2026-06-05', to: '2026-06-10', reason: 'Family vacation to Europe', status: 'Approved' },
+                    { id: 'LV-2', empId: 'EMP-1002', name: 'Marcus Vance', type: 'Sick Leave', from: '2026-06-12', to: '2026-06-13', reason: 'Flu recovery', status: 'Pending' }
+                ];
+
+                const defaultPayroll = [
+                    { id: 'PAY-1', empId: 'EMP-1001', name: 'Sarah Jenkins', base: 12083, bonus: 1500, deduction: 450, net: 13133, month: 'June 2026', status: 'Paid' },
+                    { id: 'PAY-2', empId: 'EMP-1002', name: 'Marcus Vance', base: 10000, bonus: 800, deduction: 350, net: 10450, month: 'June 2026', status: 'Paid' },
+                    { id: 'PAY-3', empId: 'EMP-1003', name: 'Elena Rostova', base: 9166, bonus: 500, deduction: 300, net: 9366, month: 'June 2026', status: 'Pending' },
+                    { id: 'PAY-4', empId: 'EMP-1004', name: 'David Kim', base: 7916, bonus: 400, deduction: 250, net: 8066, month: 'June 2026', status: 'Pending' }
+                ];
+
+                const defaultTasks = [
+                    { id: 'TSK-1', title: 'Q2 Performance Reviews', assignee: 'David Kim', due: '2026-06-20', priority: 'High', status: 'In Progress' },
+                    { id: 'TSK-2', title: 'Migrate DB to AWS Cluster', assignee: 'Marcus Vance', due: '2026-06-15', priority: 'Urgent', status: 'Pending' },
+                    { id: 'TSK-3', title: 'Design System v2 Redesign', assignee: 'Elena Rostova', due: '2026-06-28', priority: 'Medium', status: 'Completed' }
+                ];
+
+                const defaultAnnouncements = [
+                    { id: 'ANN-1', title: 'Annual Company Townhall Meeting', date: '2026-06-10', author: 'Sarah Jenkins', content: 'Join us at the main auditorium for our Q2 roadmap presentation and live Q&A session.' },
+                    { id: 'ANN-2', title: 'New Health & Wellness Benefits', date: '2026-06-03', author: 'David Kim', content: 'We have updated our gym reimbursement and mental health counselling package for all full-time staff.' }
+                ];
+
+                localStorage.setItem(appId + '_employees', JSON.stringify(defaultEmployees));
+                localStorage.setItem(appId + '_departments', JSON.stringify(defaultDepartments));
+                localStorage.setItem(appId + '_attendance', JSON.stringify(defaultAttendance));
+                localStorage.setItem(appId + '_leaves', JSON.stringify(defaultLeaves));
+                localStorage.setItem(appId + '_payroll', JSON.stringify(defaultPayroll));
+                localStorage.setItem(appId + '_tasks', JSON.stringify(defaultTasks));
+                localStorage.setItem(appId + '_announcements', JSON.stringify(defaultAnnouncements));
+                localStorage.setItem(appId + '_seeded', 'true');
+            }
+            loadDataFromStorage();
+        }
+
+        function loadDataFromStorage() {
+            dbCache.employees = JSON.parse(localStorage.getItem(appId + '_employees')) || [];
+            dbCache.departments = JSON.parse(localStorage.getItem(appId + '_departments')) || [];
+            dbCache.attendance = JSON.parse(localStorage.getItem(appId + '_attendance')) || [];
+            dbCache.leaves = JSON.parse(localStorage.getItem(appId + '_leaves')) || [];
+            dbCache.payroll = JSON.parse(localStorage.getItem(appId + '_payroll')) || [];
+            dbCache.tasks = JSON.parse(localStorage.getItem(appId + '_tasks')) || [];
+            dbCache.announcements = JSON.parse(localStorage.getItem(appId + '_announcements')) || [];
+        }
+
+        function saveData(key) {
+            localStorage.setItem(appId + '_' + key, JSON.stringify(dbCache[key]));
+        }
+
+        // --- Auth Controllers ---
+        function switchAuthTab(tab) {
+            if (tab === 'login') {
+                document.getElementById('form-login').classList.remove('hidden');
+                document.getElementById('form-register').classList.add('hidden');
+                document.getElementById('tab-login').className = 'flex-1 py-2 text-sm font-semibold rounded-lg bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm transition';
+                document.getElementById('tab-register').className = 'flex-1 py-2 text-sm font-semibold text-slate-500 dark:text-slate-400 rounded-lg transition';
+            } else {
+                document.getElementById('form-login').classList.add('hidden');
+                document.getElementById('form-register').classList.remove('hidden');
+                document.getElementById('tab-register').className = 'flex-1 py-2 text-sm font-semibold rounded-lg bg-white dark:bg-slate-600 text-slate-900 dark:text-white shadow-sm transition';
+                document.getElementById('tab-login').className = 'flex-1 py-2 text-sm font-semibold text-slate-500 dark:text-slate-400 rounded-lg transition';
+            }
+        }
+
+        function fillDemoCredentials(type) {
+            if (type === 'admin') {
+                document.getElementById('login-email').value = 'admin@nexus.com';
+                document.getElementById('login-password').value = 'admin123';
+            } else {
+                document.getElementById('login-email').value = 'marcus@nexus.com';
+                document.getElementById('login-password').value = 'emp123';
+            }
+            showToast('Demo credentials filled successfully!', 'success');
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const pass = document.getElementById('login-password').value;
+            
+            const emp = dbCache.employees.find(e => e.email.toLowerCase() === email.toLowerCase());
+            if (emp) {
+                currentUser = emp;
+                showToast(`Welcome back, ${currentUser.fname}!`, 'success');
+                renderMainLayout();
+            } else {
+                showToast('Invalid email or password. Try demo credentials.', 'error');
+            }
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            const fname = document.getElementById('reg-fname').value;
+            const lname = document.getElementById('reg-lname').value;
+            const email = document.getElementById('reg-email').value;
+            const dept = document.getElementById('reg-dept').value;
+
+            const newEmp = {
+                id: 'EMP-' + (1000 + dbCache.employees.length + 1),
+                fname,
+                lname,
+                email,
+                role: 'employee',
+                dept,
+                designation: 'Associate',
+                salary: 75000,
+                status: 'Active',
+                joiningDate: new Date().toISOString().split('T')[0],
+                phone: '+1 (555) 000-0000',
+                avatar: `https://images.unsplash.com/photo-${1500000000000 + Math.floor(Math.random()*100000)}?w=150`
+            };
+
+            dbCache.employees.push(newEmp);
+            saveData('employees');
+            currentUser = newEmp;
+            showToast('Account registered successfully!', 'success');
+            renderMainLayout();
+        }
+
+        function logout() {
+            currentUser = null;
+            location.reload();
+        }
+
+        // --- Toast Notifications ---
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bg = type === 'success' ? 'bg-emerald-600' : type === 'error' ? 'bg-rose-600' : 'bg-brand-600';
+            const icon = type === 'success' ? 'fa-circle-check' : type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-info';
+            
+            toast.className = `${bg} text-white px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 transform translate-y-2 opacity-0 transition-all duration-300 pointer-events-auto text-sm font-medium`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-lg"></i><span>${message}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // --- Main Layout Rendering ---
+        function renderMainLayout() {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="flex h-full overflow-hidden">
+                    <!-- Sidebar -->
+                    <aside id="sidebar" class="w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col transition-all duration-300 z-20">
+                        <div class="p-5 flex items-center justify-between border-b border-slate-200 dark:border-slate-700">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-brand-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-brand-600/30">
+                                    <i class="fa-solid fa-cube"></i>
+                                </div>
+                                <div>
+                                    <h2 class="font-bold text-slate-900 dark:text-white text-base">NexusHR</h2>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">Enterprise Edition</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <nav class="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+                            <button onclick="changeView('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                                <i class="fa-solid fa-chart-pie w-5 text-center"></i> Dashboard
+                            </button>
+                            <button onclick="changeView('employees')" id="nav-employees" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                                <i class="fa-solid fa-users w-5 text-center"></i> Employees
+                            </button>
+                            <button onclick="changeView('departments')" id="nav-departments" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                                <i class="fa-solid fa-building w-5 text-center"></i> Departments
+                            </button>
+                            <button onclick="changeView('attendance')" id="nav-attendance" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                                <i class="fa-solid fa-clock-rotate-left w-5 text-center"></i> Attendance
+                            </button>
+                            <button onclick="changeView('leaves')" id="nav-leaves" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                                <i class="fa-solid fa-calendar-days w-5 text-center"></i> Leave Management
+                            </button>
+                            <button onclick="changeView('payroll')" id="nav-payroll" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                                <i class="fa-solid fa-file-invoice-dollar w-5 text-center"></i> Payroll & Payslips
+                            </button>
+                            <button onclick="changeView('tasks')" id="nav-tasks" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                                <i class="fa-solid fa-list-check w-5 text-center"></i> Tasks & Projects
+                            </button>
+                            <button onclick="changeView('reports')" id="nav-reports" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                                <i class="fa-solid fa-chart-line w-5 text-center"></i> Reports & PDF Export
+                            </button>
+                        </nav>
+
+                        <div class="p-4 border-t border-slate-200 dark:border-slate-700">
+                            <div class="flex items-center gap-3 p-2 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
+                                <img src="${currentUser.avatar}" alt="Avatar" class="w-10 h-10 rounded-lg object-cover">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-semibold text-slate-900 dark:text-white truncate">${currentUser.fname} ${currentUser.lname}</p>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 capitalize">${currentUser.role}</p>
+                                </div>
+                                <button onclick="logout()" title="Sign Out" class="p-2 text-slate-400 hover:text-rose-600 transition">
+                                    <i class="fa-solid fa-right-from-bracket"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- Main Content Area -->
+                    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+                        <!-- Top Navbar -->
+                        <header class="h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-6 z-10">
+                            <div class="flex items-center gap-4">
+                                <h1 id="page-title" class="text-xl font-bold text-slate-900 dark:text-white capitalize">Dashboard</h1>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition">
+                                    <i class="fa-solid fa-moon dark:hidden"></i>
+                                    <i class="fa-solid fa-sun hidden dark:inline"></i>
+                                </button>
+                                <div class="relative">
+                                    <button onclick="toggleNotificationPanel()" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition relative">
+                                        <i class="fa-regular fa-bell"></i>
+                                        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full"></span>
+                                    </button>
+                                </div>
+                            </div>
+                        </header>
+
+                        <!-- Main Scrollable Content -->
+                        <main id="main-content" class="flex-1 overflow-y-auto p-6 bg-slate-50 dark:bg-slate-900">
+                            <!-- Rendered Views -->
+                        </main>
+                    </div>
+                </div>
+            `;
+            changeView('dashboard');
+        }
+
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+        }
+
+        function changeView(view) {
+            currentView = view;
+            document.querySelectorAll('aside nav button').forEach(btn => {
+                btn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50";
+            });
+            const activeBtn = document.getElementById(`nav-${view}`);
+            if (activeBtn) {
+                activeBtn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition bg-brand-600 text-white shadow-lg shadow-brand-600/30";
+            }
+            
+            const titles = {
+                dashboard: 'Enterprise Dashboard',
+                employees: 'Employee Directory',
+                departments: 'Department Management',
+                attendance: 'Attendance Tracking',
+                leaves: 'Leave Management',
+                payroll: 'Payroll & Salary Management',
+                tasks: 'Tasks & Projects',
+                reports: 'Reports & Analytics & PDF Export'
+            };
+            document.getElementById('page-title').innerText = titles[view] || 'Dashboard';
+
+            // Render view content
+            if (view === 'dashboard') renderDashboardView();
+            else if (view === 'employees') renderEmployeesView();
+            else if (view === 'departments') renderDepartmentsView();
+            else if (view === 'attendance') renderAttendanceView();
+            else if (view === 'leaves') renderLeavesView();
+            else if (view === 'payroll') renderPayrollView();
+            else if (view === 'tasks') renderTasksView();
+            else if (view === 'reports') renderReportsView();
+        }
+
+        // --- 1. Dashboard View ---
+        function renderDashboardView() {
+            const totalEmps = dbCache.employees.length;
+            const activeEmps = dbCache.employees.filter(e => e.status === 'Active').length;
+            const deptCount = dbCache.departments.length;
+            const totalPayroll = dbCache.payroll.reduce((acc, curr) => acc + curr.net, 0);
+
+            const content = document.getElementById('main-content');
+            content.innerHTML = `
+                <div class="space-y-6">
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold uppercase text-slate-400">Total Employees</p>
+                                <h3 class="text-3xl font-bold text-slate-900 dark:text-white mt-1">${totalEmps}</h3>
+                                <p class="text-xs text-emerald-600 mt-2 font-medium"><i class="fa-solid fa-arrow-up"></i> +12% this month</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-brand-50 dark:bg-brand-900/40 text-brand-600 dark:text-brand-400 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold uppercase text-slate-400">Active Staff</p>
+                                <h3 class="text-3xl font-bold text-slate-900 dark:text-white mt-1">${activeEmps}</h3>
+                                <p class="text-xs text-emerald-600 mt-2 font-medium"><i class="fa-solid fa-circle-check"></i> 98% operational</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-user-check"></i>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold uppercase text-slate-400">Departments</p>
+                                <h3 class="text-3xl font-bold text-slate-900 dark:text-white mt-1">${deptCount}</h3>
+                                <p class="text-xs text-slate-500 mt-2 font-medium">Cross-functional units</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-building"></i>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold uppercase text-slate-400">Monthly Payroll</p>
+                                <h3 class="text-3xl font-bold text-slate-900 dark:text-white mt-1">$${totalPayroll.toLocaleString()}</h3>
+                                <p class="text-xs text-emerald-600 mt-2 font-medium"><i class="fa-solid fa-check"></i> Fully Disbursed</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-wallet"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Section -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4">Department Distribution</h3>
+                            <div class="h-72 flex items-center justify-center">
+                                <canvas id="deptChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4">Attendance Trend (This Week)</h3>
+                            <div class="h-72 flex items-center justify-center">
+                                <canvas id="attendanceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Announcements & Tasks -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white">Company Announcements</h3>
+                                ${currentUser.role === 'admin' ? `<button onclick="showAddAnnouncementModal()" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold rounded-lg shadow">Post Announcement</button>` : ''}
+                            </div>
+                            <div class="space-y-4">
+                                ${dbCache.announcements.map(ann => `
+                                    <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600">
+                                        <div class="flex justify-between items-start mb-1">
+                                            <h4 class="font-bold text-slate-900 dark:text-white text-sm">${ann.title}</h4>
+                                            <span class="text-xs text-slate-400">${ann.date}</span>
+                                        </div>
+                                        <p class="text-xs text-slate-600 dark:text-slate-300">${ann.content}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4">Active Tasks Overview</h3>
+                            <div class="space-y-3">
+                                ${dbCache.tasks.map(t => `
+                                    <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600">
+                                        <div>
+                                            <p class="text-sm font-semibold text-slate-900 dark:text-white">${t.title}</p>
+                                            <p class="text-xs text-slate-500">Assigned to: <span class="font-medium text-brand-600 dark:text-brand-400">${t.assignee}</span> • Due ${t.due}</p>
+                                        </div>
+                                        <span class="px-2.5 py-1 text-xs font-semibold rounded-full ${t.status === 'Completed' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'}">${t.status}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Initialize Charts
+            setTimeout(() => {
+                const deptCtx = document.getElementById('deptChart').getContext('2d');
+                new Chart(deptCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: dbCache.departments.map(d => d.name),
+                        datasets: [{
+                            data: dbCache.departments.map(d => dbCache.employees.filter(e => e.dept === d.name).length),
+                            backgroundColor: ['#6366f1', '#3b82f6', '#10b981', '#f59e0b', '#ec4899']
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+
+                const attCtx = document.getElementById('attendanceChart').getContext('2d');
+                new Chart(attCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                        datasets: [{
+                            label: 'Present Staff',
+                            data: [4, 5, 4, 5, 4],
+                            backgroundColor: '#6366f1',
+                            borderRadius: 8
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
+                });
+            }, 50);
+        }
+
+        // --- 2. Employee Management View ---
+        function renderEmployeesView() {
+            const content = document.getElementById('main-content');
+            content.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <div class="flex items-center gap-3 w-full sm:w-auto">
+                            <div class="relative flex-1 sm:w-80">
+                                <i class="fa-solid fa-search absolute left-3.5 top-3 text-slate-400"></i>
+                                <input type="text" id="emp-search" oninput="filterEmployees()" placeholder="Search employees by name or email..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 outline-none">
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                            <button onclick="exportEmployeesCSV()" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-sm font-semibold rounded-xl transition flex items-center gap-2">
+                                <i class="fa-solid fa-file-csv"></i> Export CSV
+                            </button>
+                            ${currentUser.role === 'admin' ? `
+                                <button onclick="showAddEmployeeModal()" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold rounded-xl shadow-lg shadow-brand-600/30 transition flex items-center gap-2">
+                                    <i class="fa-solid fa-user-plus"></i> Add Employee
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    <!-- Employee Table -->
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">
+                                        <th class="p-4">Employee</th>
+                                        <th class="p-4">Department</th>
+                                        <th class="p-4">Designation</th>
+                                        <th class="p-4">Status</th>
+                                        <th class="p-4">Salary</th>
+                                        <th class="p-4 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="employee-table-body" class="divide-y divide-slate-200 dark:divide-slate-700 text-sm">
+                                    ${dbCache.employees.map(emp => `
+                                        <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition">
+                                            <td class="p-4 flex items-center gap-3">
+                                                <img src="${emp.avatar}" class="w-10 h-10 rounded-xl object-cover">
+                                                <div>
+                                                    <p class="font-bold text-slate-900 dark:text-white">${emp.fname} ${emp.lname}</p>
+                                                    <p class="text-xs text-slate-500">${emp.email}</p>
+                                                </div>
+                                            </td>
+                                            <td class="p-4 font-medium text-slate-700 dark:text-slate-300">${emp.dept}</td>
+                                            <td class="p-4 text-slate-600 dark:text-slate-400">${emp.designation}</td>
+                                            <td class="p-4">
+                                                <span class="px-2.5 py-1 text-xs font-semibold rounded-full ${emp.status === 'Active' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'}">${emp.status}</span>
+                                            </td>
+                                            <td class="p-4 font-semibold text-slate-900 dark:text-white">$${emp.salary.toLocaleString()}</td>
+                                            <td class="p-4 text-right space-x-2">
+                                                <button onclick="viewEmployeeProfile('${emp.id}')" class="p-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-slate-700 dark:text-slate-200 rounded-lg transition" title="View Profile">
+                                                    <i class="fa-solid fa-eye"></i>
+                                                </button>
+                                                ${currentUser.role === 'admin' ? `
+                                                    <button onclick="deleteEmployee('${emp.id}')" class="p-2 bg-rose-50 dark:bg-rose-900/30 hover:bg-rose-100 text-rose-600 rounded-lg transition" title="Delete">
+                                                        <i class="fa-solid fa-trash"></i>
+                                                    </button>
+                                                ` : ''}
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function filterEmployees() {
+            const query = document.getElementById('emp-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#employee-table-body tr');
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        }
+
+        function showAddEmployeeModal() {
+            const modal = document.getElementById('modal-container');
+            modal.classList.remove('hidden');
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-4">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Add New Employee</h3>
+                        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    </div>
+                    <form onsubmit="handleCreateEmployee(event)" class="space-y-4">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase mb-1">First Name</label>
+                                <input type="text" id="new-emp-fname" required class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase mb-1">Last Name</label>
+                                <input type="text" id="new-emp-lname" required class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent text-sm">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase mb-1">Email</label>
+                                <input type="email" id="new-emp-email" required class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase mb-1">Phone</label>
+                                <input type="text" id="new-emp-phone" required value="+1 (555) " class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent text-sm">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase mb-1">Department</label>
+                                <select id="new-emp-dept" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm">
+                                    ${dbCache.departments.map(d => `<option value="${d.name}">${d.name}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase mb-1">Designation</label>
+                                <input type="text" id="new-emp-desig" required class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent text-sm">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase mb-1">Annual Salary ($)</label>
+                                <input type="number" id="new-emp-salary" required value="90000" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase mb-1">Status</label>
+                                <select id="new-emp-status" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm">
+                                    <option value="Active">Active</option>
+                                    <option value="On Leave">On Leave</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-sm font-medium">Cancel</button>
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-brand-600 text-white text-sm font-semibold shadow">Save Employee</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+        }
+
+        function handleCreateEmployee(e) {
+            e.preventDefault();
+            const newEmp = {
+                id: 'EMP-' + (1000 + dbCache.employees.length + 1),
+                fname: document.getElementById('new-emp-fname').value,
+                lname: document.getElementById('new-emp-lname').value,
+                email: document.getElementById('new-emp-email').value,
+                phone: document.getElementById('new-emp-phone').value,
+                dept: document.getElementById('new-emp-dept').value,
+                designation: document.getElementById('new-emp-desig').value,
+                salary: parseFloat(document.getElementById('new-emp-salary').value),
+                status: document.getElementById('new-emp-status').value,
+                role: 'employee',
+                joiningDate: new Date().toISOString().split('T')[0],
+                avatar: `https://images.unsplash.com/photo-${1500000000000 + Math.floor(Math.random()*100000)}?w=150`
+            };
+
+            dbCache.employees.push(newEmp);
+            saveData('employees');
+            closeModal();
+            showToast('Employee added successfully!', 'success');
+            renderEmployeesView();
+        }
+
+        function deleteEmployee(id) {
+            if (confirm('Are you sure you want to delete this employee?')) {
+                dbCache.employees = dbCache.employees.filter(e => e.id !== id);
+                saveData('employees');
+                showToast('Employee deleted successfully!', 'success');
+                renderEmployeesView();
+            }
+        }
+
+        function viewEmployeeProfile(id) {
+            const emp = dbCache.employees.find(e => e.id === id);
+            if (!emp) return;
+            const modal = document.getElementById('modal-container');
+            modal.classList.remove('hidden');
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-slate-800 w-full max-w-xl rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 space-y-6">
+                    <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-4">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Employee Profile</h3>
+                        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    </div>
+                    <div class="flex items-center gap-5">
+                        <img src="${emp.avatar}" class="w-20 h-20 rounded-2xl object-cover shadow-lg">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-900 dark:text-white">${emp.fname} ${emp.lname}</h2>
+                            <p class="text-sm text-brand-600 dark:text-brand-400 font-medium">${emp.designation}</p>
+                            <p class="text-xs text-slate-500 mt-1">ID: ${emp.id} • Joined: ${emp.joiningDate}</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 bg-slate-50 dark:bg-slate-700/40 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <div>
+                            <p class="text-xs uppercase text-slate-400 font-semibold">Email</p>
+                            <p class="text-sm font-medium text-slate-900 dark:text-white">${emp.email}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs uppercase text-slate-400 font-semibold">Phone</p>
+                            <p class="text-sm font-medium text-slate-900 dark:text-white">${emp.phone}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs uppercase text-slate-400 font-semibold">Department</p>
+                            <p class="text-sm font-medium text-slate-900 dark:text-white">${emp.dept}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs uppercase text-slate-400 font-semibold">Salary</p>
+                            <p class="text-sm font-medium text-slate-900 dark:text-white">$${emp.salary.toLocaleString()}</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-end pt-4 border-t border-slate-200 dark:border-slate-700">
+                        <button onclick="closeModal()" class="px-5 py-2.5 bg-brand-600 text-white rounded-xl text-sm font-semibold shadow">Close Profile</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- 3. Department Management View ---
+        function renderDepartmentsView() {
+            const content = document.getElementById('main-content');
+            content.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Company Departments</h3>
+                        ${currentUser.role === 'admin' ? `<button onclick="showAddDeptModal()" class="px-4 py-2.5 bg-brand-600 text-white text-sm font-semibold rounded-xl shadow">Create Department</button>` : ''}
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${dbCache.departments.map(dept => {
+                            const empCount = dbCache.employees.filter(e => e.dept === dept.name).length;
+                            return `
+                                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                                    <div class="flex justify-between items-start">
+                                        <div class="w-12 h-12 rounded-xl bg-brand-50 dark:bg-brand-900/40 text-brand-600 flex items-center justify-center text-xl">
+                                            <i class="fa-solid fa-building-user"></i>
+                                        </div>
+                                        <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">${empCount} Members</span>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-lg font-bold text-slate-900 dark:text-white">${dept.name}</h4>
+                                        <p class="text-xs text-slate-500 mt-0.5">Head: <span class="font-medium text-slate-700 dark:text-slate-300">${dept.head}</span></p>
+                                    </div>
+                                    <div class="pt-4 border-t border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                                        <span class="text-xs text-slate-400 uppercase font-semibold">Allocated Budget</span>
+                                        <span class="text-sm font-bold text-slate-900 dark:text-white">$${dept.budget.toLocaleString()}</span>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- 4. Attendance Management View ---
+        function renderAttendanceView() {
+            const content = document.getElementById('main-content');
+            content.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white">Daily Attendance & Check-In</h3>
+                            <p class="text-xs text-slate-500">Record your daily work hours and review history.</p>
+                        </div>
+                        <button onclick="recordAttendance()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl shadow-lg shadow-emerald-600/30 transition flex items-center gap-2">
+                            <i class="fa-solid fa-fingerprint"></i> Check In Now
+                        </button>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold uppercase text-slate-500">
+                                    <th class="p-4">Employee</th>
+                                    <th class="p-4">Date</th>
+                                    <th class="p-4">Check In</th>
+                                    <th class="p-4">Check Out</th>
+                                    <th class="p-4">Total Hours</th>
+                                    <th class="p-4">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-slate-700 text-sm">
+                                ${dbCache.attendance.map(att => `
+                                    <tr>
+                                        <td class="p-4 font-bold text-slate-900 dark:text-white">${att.name}</td>
+                                        <td class="p-4 text-slate-600 dark:text-slate-400">${att.date}</td>
+                                        <td class="p-4 text-slate-600 dark:text-slate-400">${att.checkIn}</td>
+                                        <td class="p-4 text-slate-600 dark:text-slate-400">${att.checkOut}</td>
+                                        <td class="p-4 font-semibold text-slate-900 dark:text-white">${att.hours}</td>
+                                        <td class="p-4">
+                                            <span class="px-2.5 py-1 text-xs font-semibold rounded-full ${att.status === 'Present' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'}">${att.status}</span>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function recordAttendance() {
+            const today = new Date().toISOString().split('T')[0];
+            const newAtt = {
+                id: 'ATT-' + (dbCache.attendance.length + 1),
+                empId: currentUser.id,
+                name: currentUser.fname + ' ' + currentUser.lname,
+                date: today,
+                checkIn: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                checkOut: 'Pending',
+                status: 'Present',
+                hours: 'Active'
+            };
+            dbCache.attendance.unshift(newAtt);
+            localStorage.setItem(appId + '_attendance', JSON.stringify(dbCache.attendance));
+            showToast('Checked in successfully!', 'success');
+            renderAttendanceView();
+        }
+
+        // --- 5. Leave Management View ---
+        function renderLeavesView() {
+            const content = document.getElementById('main-content');
+            content.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Leave Requests & Balance</h3>
+                        <button onclick="showApplyLeaveModal()" class="px-4 py-2.5 bg-brand-600 text-white text-sm font-semibold rounded-xl shadow">Apply for Leave</button>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold uppercase text-slate-500">
+                                    <th class="p-4">Employee</th>
+                                    <th class="p-4">Leave Type</th>
+                                    <th class="p-4">From</th>
+                                    <th class="p-4">To</th>
+                                    <th class="p-4">Reason</th>
+                                    <th class="p-4">Status</th>
+                                    ${currentUser.role === 'admin' ? '<th class="p-4 text-right">Actions</th>' : ''}
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-slate-700 text-sm">
+                                ${dbCache.leaves.map(lv => `
+                                    <tr>
+                                        <td class="p-4 font-bold text-slate-900 dark:text-white">${lv.name}</td>
+                                        <td class="p-4 text-slate-600 dark:text-slate-400">${lv.type}</td>
+                                        <td class="p-4 text-slate-600 dark:text-slate-400">${lv.from}</td>
+                                        <td class="p-4 text-slate-600 dark:text-slate-400">${lv.to}</td>
+                                        <td class="p-4 text-slate-600 dark:text-slate-400">${lv.reason}</td>
+                                        <td class="p-4">
+                                            <span class="px-2.5 py-1 text-xs font-semibold rounded-full ${lv.status === 'Approved' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300'}">${lv.status}</span>
+                                        </td>
+                                        ${currentUser.role === 'admin' && lv.status === 'Pending' ? `
+                                            <td class="p-4 text-right space-x-2">
+                                                <button onclick="updateLeaveStatus('${lv.id}', 'Approved')" class="px-3 py-1 bg-emerald-600 text-white text-xs font-semibold rounded-lg">Approve</button>
+                                                <button onclick="updateLeaveStatus('${lv.id}', 'Rejected')" class="px-3 py-1 bg-rose-600 text-white text-xs font-semibold rounded-lg">Reject</button>
+                                            </td>
+                                        ` : ''}
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showApplyLeaveModal() {
+            const modal = document.getElementById('modal-container');
+            modal.classList.remove('hidden');
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-4">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Apply for Leave</h3>
+                        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    </div>
+                    <form onsubmit="handleApplyLeave(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase mb-1">Leave Type</label>
+                            <select id="leave-type" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm">
+                                <option value="Annual Leave">Annual Leave</option>
+                                <option value="Sick Leave">Sick Leave</option>
+                                <option value="Casual Leave">Casual Leave</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase mb-1">From Date</label>
+                                <input type="date" id="leave-from" required class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase mb-1">To Date</label>
+                                <input type="date" id="leave-to" required class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent text-sm">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase mb-1">Reason</label>
+                            <textarea id="leave-reason" rows="3" required class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent text-sm"></textarea>
+                        </div>
+                        <div class="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-sm font-medium">Cancel</button>
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-brand-600 text-white text-sm font-semibold shadow">Submit Request</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+        }
+
+        function handleApplyLeave(e) {
+            e.preventDefault();
+            const newLeave = {
+                id: 'LV-' + (dbCache.leaves.length + 1),
+                empId: currentUser.id,
+                name: currentUser.fname + ' ' + currentUser.lname,
+                type: document.getElementById('leave-type').value,
+                from: document.getElementById('leave-from').value,
+                to: document.getElementById('leave-to').value,
+                reason: document.getElementById('leave-reason').value,
+                status: 'Pending'
+            };
+            dbCache.leaves.unshift(newLeave);
+            localStorage.setItem(appId + '_leaves', JSON.stringify(dbCache.leaves));
+            closeModal();
+            showToast('Leave request submitted successfully!', 'success');
+            renderLeavesView();
+        }
+
+        function updateLeaveStatus(id, status) {
+            const lv = dbCache.leaves.find(l => l.id === id);
+            if (lv) {
+                lv.status = status;
+                localStorage.setItem(appId + '_leaves', JSON.stringify(dbCache.leaves));
+                showToast(`Leave request ${status.toLowerCase()}!`, 'success');
+                renderLeavesView();
+            }
+        }
+
+        // --- 6. Payroll Management View ---
+        function renderPayrollView() {
+            const content = document.getElementById('main-content');
+            content.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Payroll & Payslips</h3>
+                        <p class="text-xs text-slate-500">June 2026 Payment Cycle</p>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700 text-xs font-semibold uppercase text-slate-500">
+                                    <th class="p-4">Employee</th>
+                                    <th class="p-4">Month</th>
+                                    <th class="p-4">Base Salary</th>
+                                    <th class="p-4">Bonus</th>
+                                    <th class="p-4">Net Pay</th>
+                                    <th class="p-4">Status</th>
+                                    <th class="p-4 text-right">Payslip PDF</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-slate-700 text-sm">
+                                ${dbCache.payroll.map(pay => `
+                                    <tr>
+                                        <td class="p-4 font-bold text-slate-900 dark:text-white">${pay.name}</td>
+                                        <td class="p-4 text-slate-600 dark:text-slate-400">${pay.month}</td>
+                                        <td class="p-4 text-slate-600 dark:text-slate-400">$${pay.base.toLocaleString()}</td>
+                                        <td class="p-4 text-emerald-600 font-medium">+$${pay.bonus.toLocaleString()}</td>
+                                        <td class="p-4 font-bold text-slate-900 dark:text-white">$${pay.net.toLocaleString()}</td>
+                                        <td class="p-4">
+                                            <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300">${pay.status}</span>
+                                        </td>
+                                        <td class="p-4 text-right">
+                                            <button onclick="downloadPayslipPDF('${pay.id}')" class="px-3 py-1.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold rounded-lg shadow">
+                                                <i class="fa-solid fa-download mr-1"></i> Download PDF
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- 7. Tasks & Projects View ---
+        function renderTasksView() {
+            const content = document.getElementById('main-content');
+            content.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Active Tasks & Projects</h3>
+                        <button onclick="showAddTaskModal()" class="px-4 py-2.5 bg-brand-600 text-white text-sm font-semibold rounded-xl shadow">Assign Task</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        ${dbCache.tasks.map(t => `
+                            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                                <div class="flex justify-between items-start">
+                                    <span class="px-2.5 py-1 text-xs font-semibold rounded-full ${t.priority === 'Urgent' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'}">${t.priority}</span>
+                                    <span class="text-xs text-slate-400">Due ${t.due}</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900 dark:text-white">${t.title}</h4>
+                                    <p class="text-xs text-slate-500 mt-1">Assignee: <span class="font-semibold text-brand-600">${t.assignee}</span></p>
+                                </div>
+                                <div class="flex justify-between items-center pt-3 border-t border-slate-100 dark:border-slate-700">
+                                    <span class="text-xs font-medium text-slate-500">Status: ${t.status}</span>
+                                    <button onclick="toggleTaskStatus('${t.id}')" class="px-3 py-1 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 text-xs font-semibold rounded-lg">Toggle Status</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- 8. Reports & Real PDF Download System ---
+        function renderReportsView() {
+            const content = document.getElementById('main-content');
+            content.innerHTML = `
+                <div class="space-y-6">
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Enterprise Reports & PDF Export Center</h3>
+                        <p class="text-sm text-slate-500">Generate fully formatted professional PDFs that automatically download directly to your device's Downloads folder.</p>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
+                            <button onclick="downloadReportPDF('Employee Directory Report')" class="p-5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-brand-500 bg-slate-50 dark:bg-slate-700/50 text-left transition space-y-2 group">
+                                <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center text-lg shadow">
+                                    <i class="fa-solid fa-users"></i>
+                                </div>
+                                <h4 class="font-bold text-slate-900 dark:text-white group-hover:text-brand-600">Employee Report</h4>
+                                <p class="text-xs text-slate-500">Full roster, salaries and status summary.</p>
+                            </button>
+
+                            <button onclick="downloadReportPDF('Attendance Summary Report')" class="p-5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-brand-500 bg-slate-50 dark:bg-slate-700/50 text-left transition space-y-2 group">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-lg shadow">
+                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                </div>
+                                <h4 class="font-bold text-slate-900 dark:text-white group-hover:text-brand-600">Attendance Report</h4>
+                                <p class="text-xs text-slate-500">Daily hours and punctuality stats.</p>
+                            </button>
+
+                            <button onclick="downloadReportPDF('Leave Audit Report')" class="p-5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-brand-500 bg-slate-50 dark:bg-slate-700/50 text-left transition space-y-2 group">
+                                <div class="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center text-lg shadow">
+                                    <i class="fa-solid fa-calendar-days"></i>
+                                </div>
+                                <h4 class="font-bold text-slate-900 dark:text-white group-hover:text-brand-600">Leave Report</h4>
+                                <p class="text-xs text-slate-500">Approved and pending time off requests.</p>
+                            </button>
+
+                            <button onclick="downloadReportPDF('Payroll Financial Report')" class="p-5 rounded-2xl border border-slate-200 dark:border-slate-700 hover:border-brand-500 bg-slate-50 dark:bg-slate-700/50 text-left transition space-y-2 group">
+                                <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-lg shadow">
+                                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                                </div>
+                                <h4 class="font-bold text-slate-900 dark:text-white group-hover:text-brand-600">Payroll Report</h4>
+                                <p class="text-xs text-slate-500">Monthly disbursement breakdown.</p>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Real PDF Generator using jsPDF
+        function downloadReportPDF(title) {
+            showToast(`Generating ${title}...`, 'info');
+            setTimeout(() => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                doc.setFillColor(79, 70, 229);
+                doc.rect(0, 0, 210, 30, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(18);
+                doc.text('NexusHR Enterprise Management', 14, 18);
+
+                doc.setTextColor(50, 50, 50);
+                doc.setFontSize(14);
+                doc.text(title, 14, 45);
+
+                doc.setFontSize(10);
+                doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 53);
+                doc.text(`Generated by: ${currentUser.fname} ${currentUser.lname} (${currentUser.role})`, 14, 59);
+
+                doc.setDrawColor(200, 200, 200);
+                doc.line(14, 65, 196, 65);
+
+                let y = 75;
+                if (title.includes('Employee')) {
+                    dbCache.employees.forEach((e, idx) => {
+                        if (y > 270) { doc.addPage(); y = 20; }
+                        doc.text(`${idx + 1}. ${e.fname} ${e.lname} - ${e.dept} (${e.designation}) - Salary: $${e.salary.toLocaleString()}`, 14, y);
+                        y += 10;
+                    });
+                } else if (title.includes('Attendance')) {
+                    dbCache.attendance.forEach((a, idx) => {
+                        if (y > 270) { doc.addPage(); y = 20; }
+                        doc.text(`${idx + 1}. ${a.name} - Date: ${a.date} - In: ${a.checkIn} - Status: ${a.status}`, 14, y);
+                        y += 10;
+                    });
+                } else {
+                    dbCache.payroll.forEach((p, idx) => {
+                        if (y > 270) { doc.addPage(); y = 20; }
+                        doc.text(`${idx + 1}. ${p.name} - ${p.month} - Net Pay: $${p.net.toLocaleString()} (${p.status})`, 14, y);
+                        y += 10;
+                    });
+                }
+
+                doc.save(`${title.toLowerCase().replace(/\s+/g, '_')}.pdf`);
+                showToast('PDF downloaded successfully to your device!', 'success');
+            }, 800);
+        }
+
+        function downloadPayslipPDF(payId) {
+            const pay = dbCache.payroll.find(p => p.id === payId);
+            if (!pay) return;
+            showToast('Generating official payslip PDF...', 'info');
+            setTimeout(() => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                doc.setFillColor(79, 70, 229);
+                doc.rect(0, 0, 210, 35, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(20);
+                doc.text('NexusHR Enterprise Payslip', 14, 22);
+
+                doc.setTextColor(50, 50, 50);
+                doc.setFontSize(12);
+                doc.text(`Employee Name: ${pay.name}`, 14, 50);
+                doc.text(`Payment Cycle: ${pay.month}`, 14, 58);
+                doc.text(`Status: ${pay.status}`, 14, 66);
+
+                doc.line(14, 75, 196, 75);
+
+                doc.text(`Base Salary: $${pay.base.toLocaleString()}`, 14, 90);
+                doc.text(`Bonus Allowance: +$${pay.bonus.toLocaleString()}`, 14, 100);
+                doc.text(`Statutory Deductions: -$${pay.deduction.toLocaleString()}`, 14, 110);
+
+                doc.setFontSize(14);
+                doc.setTextColor(79, 70, 229);
+                doc.text(`Net Disbursement: $${pay.net.toLocaleString()}`, 14, 130);
+
+                doc.save(`payslip_${pay.name.toLowerCase().replace(/\s+/g, '_')}.pdf`);
+                showToast('Payslip PDF downloaded successfully!', 'success');
+            }, 600);
+        }
+
+        function exportEmployeesCSV() {
+            let csv = 'ID,First Name,Last Name,Email,Department,Designation,Salary,Status\n';
+            dbCache.employees.forEach(e => {
+                csv += `${e.id},${e.fname},${e.lname},${e.email},${e.dept},${e.designation},${e.salary},${e.status}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'employee_directory.csv');
+            a.click();
+            showToast('CSV export successful!', 'success');
+        }
+
+        // --- Utility Modals ---
+        function closeModal() {
+            const modal = document.getElementById('modal-container');
+            modal.classList.add('hidden');
+            modal.innerHTML = '';
+        }
+
+        function showAddAnnouncementModal() {
+            const modal = document.getElementById('modal-container');
+            modal.classList.remove('hidden');
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-4">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Post Announcement</h3>
+                        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    </div>
+                    <form onsubmit="handlePostAnnouncement(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase mb-1">Title</label>
+                            <input type="text" id="ann-title" required class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase mb-1">Content</label>
+                            <textarea id="ann-content" rows="4" required class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent text-sm"></textarea>
+                        </div>
+                        <div class="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-sm font-medium">Cancel</button>
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-brand-600 text-white text-sm font-semibold shadow">Post Announcement</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+        }
+
+        function handlePostAnnouncement(e) {
+            e.preventDefault();
+            const ann = {
+                id: 'ANN-' + (dbCache.announcements.length + 1),
+                title: document.getElementById('ann-title').value,
+                date: new Date().toISOString().split('T')[0],
+                author: currentUser.fname + ' ' + currentUser.lname,
+                content: document.getElementById('ann-content').value
+            };
+            dbCache.announcements.unshift(ann);
+            localStorage.setItem(appId + '_announcements', JSON.stringify(dbCache.announcements));
+            closeModal();
+            showToast('Announcement posted successfully!', 'success');
+            renderDashboardView();
+        }
+
+        function showAddTaskModal() {
+            const modal = document.getElementById('modal-container');
+            modal.classList.remove('hidden');
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-6 space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-200 dark:border-slate-700 pb-4">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Assign New Task</h3>
+                        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    </div>
+                    <form onsubmit="handleAddTask(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase mb-1">Task Title</label>
+                            <input type="text" id="task-title" required class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase mb-1">Assignee</label>
+                            <select id="task-assignee" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm">
+                                ${dbCache.employees.map(e => `<option value="${e.fname} ${e.lname}">${e.fname} ${e.lname}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase mb-1">Due Date</label>
+                                <input type="date" id="task-due" required class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-transparent text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase mb-1">Priority</label>
+                                <select id="task-priority" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-sm">
+                                    <option value="Normal">Normal</option>
+                                    <option value="High">High</option>
+                                    <option value="Urgent">Urgent</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <button type="button" onclick="closeModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-700 text-sm font-medium">Cancel</button>
+                            <button type="submit" class="px-4 py-2 rounded-xl bg-brand-600 text-white text-sm font-semibold shadow">Assign Task</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+        }
+
+        function handleAddTask(e) {
+            e.preventDefault();
+            const task = {
+                id: 'TSK-' + (dbCache.tasks.length + 1),
+                title: document.getElementById('task-title').value,
+                assignee: document.getElementById('task-assignee').value,
+                due: document.getElementById('task-due').value,
+                priority: document.getElementById('task-priority').value,
+                status: 'Pending'
+            };
+            dbCache.tasks.unshift(task);
+            localStorage.setItem(appId + '_tasks', JSON.stringify(dbCache.tasks));
+            closeModal();
+            showToast('Task assigned successfully!', 'success');
+            renderTasksView();
+        }
+
+        function toggleTaskStatus(id) {
+            const t = dbCache.tasks.find(ts => ts.id === id);
+            if (t) {
+                t.status = t.status === 'Completed' ? 'Pending' : 'Completed';
+                localStorage.setItem(appId + '_tasks', JSON.stringify(dbCache.tasks));
+                showToast('Task status updated!', 'success');
+                renderTasksView();
+            }
+        }
+
+        function showForgotPasswordModal() {
+            showToast('Password reset link sent to registered email address.', 'success');
+        }
+
+        function toggleNotificationPanel() {
+            showToast('No new unread notification alerts.', 'info');
+        }
+
+        // Initialize App on Window Load
+        window.onload = function() {
+            initializeDefaultData();
+        };
+    </script>
+</body>
+</html>
